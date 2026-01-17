@@ -112,4 +112,22 @@ export class UsersService {
     const { password: _, ...result } = updatedUser;
     return result;
   }
+
+  async delete(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Delete user details first (due to foreign key constraint)
+    await this.userDetailsRepository.delete({ user_id: id });
+
+    // Delete user
+    await this.userRepository.delete({ id });
+
+    return { message: 'User deleted successfully' };
+  }
 }

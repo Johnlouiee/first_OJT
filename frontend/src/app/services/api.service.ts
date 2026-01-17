@@ -81,4 +81,8 @@ export class ApiService {
   updateUser(id: number, data: UpdateUserRequest): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/users/${id}`, data, { headers: this.getHeaders() });
   }
+
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${id}`, { headers: this.getHeaders() });
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Body, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Param, Body, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -21,5 +21,10 @@ export class UsersController {
   @Put(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.delete(id);
   }
 }

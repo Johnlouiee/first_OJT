@@ -61,6 +61,35 @@ export class LandingComponent implements OnInit {
     this.router.navigate(['/edit-user', userId]);
   }
 
+  deleteUser(userId: number) {
+    const confirmed = confirm('Are you sure you want to delete this user? This action cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    this.apiService.deleteUser(userId).subscribe({
+      next: () => {
+        // Remove the user from the local array immediately
+        const initialCount = this.users.length;
+        this.users = this.users.filter(u => u.id !== userId);
+        console.log(`User ${userId} deleted. Users count: ${initialCount} -> ${this.users.length}`);
+        
+        this.successMessage = 'User deleted successfully!';
+        this.errorMessage = '';
+        
+        // Clear success message after 2 seconds
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Failed to delete user:', error);
+        this.errorMessage = error.error?.message || 'Failed to delete user. Please try again.';
+        this.successMessage = '';
+      }
+    });
+  }
+
   editProfile() {
     if (this.currentUser?.id) {
       this.router.navigate(['/edit-user', this.currentUser.id]);
