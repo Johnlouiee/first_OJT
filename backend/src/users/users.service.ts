@@ -27,6 +27,23 @@ export class UsersService {
     }));
   }
 
+  async findOne(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['userDetails'],
+      select: ['id', 'username', 'email', 'is_active', 'created_at', 'updated_at'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return {
+      ...user,
+      userDetails: user.userDetails || null,
+    };
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({
       where: { id },

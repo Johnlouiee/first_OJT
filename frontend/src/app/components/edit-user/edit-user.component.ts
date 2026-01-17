@@ -74,26 +74,19 @@ export class EditUserComponent implements OnInit {
   }
 
   loadUser() {
+    if (!this.userId) return;
+
     this.loading = true;
     this.errorMessage = '';
-    this.apiService.getAllUsers().subscribe({
-      next: (users) => {
-        const user = users.find(u => u.id === this.userId);
-        if (user) {
-          this.currentUser = user;
-          this.populateForm(user);
-        } else {
-          // If user not found in API, at least we have the form displayed
-          console.warn('User not found in API');
-        }
+    this.apiService.getUser(this.userId).subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        this.populateForm(user);
         this.loading = false;
       },
       error: (error) => {
         console.error('Error loading user:', error);
-        // Don't show error if we already have the user from localStorage
-        if (!this.currentUser) {
-          this.errorMessage = error.error?.message || 'Failed to load user data. Please try again.';
-        }
+        this.errorMessage = error.error?.message || 'Failed to load user data. Please try again.';
         this.loading = false;
       }
     });
