@@ -1,0 +1,62 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { ApiService, User } from '../../services/api.service';
+
+@Component({
+  selector: 'app-landing',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './landing.component.html',
+  styleUrl: './landing.component.css'
+})
+export class LandingComponent implements OnInit {
+  users: User[] = [];
+  loading = false;
+  errorMessage = '';
+
+  constructor(
+    private apiService: ApiService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.loading = true;
+    this.errorMessage = '';
+    this.apiService.getAllUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Failed to load users. Please try again.';
+        this.loading = false;
+      }
+    });
+  }
+
+  editUser(userId: number) {
+    this.router.navigate(['/edit-user', userId]);
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login']);
+  }
+
+  getFullName(user: User): string {
+    if (user.userDetails?.first_name && user.userDetails?.last_name) {
+      return `${user.userDetails.first_name} ${user.userDetails.last_name}`;
+    }
+    return '-';
+  }
+
+  getContact(user: User): string {
+    return user.userDetails?.contact_number || '-';
+  }
+}
