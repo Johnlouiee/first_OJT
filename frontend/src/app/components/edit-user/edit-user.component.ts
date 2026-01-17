@@ -14,6 +14,7 @@ import { ApiService } from '../../services/api.service';
 export class EditUserComponent implements OnInit {
   editForm: FormGroup;
   userId: number | null = null;
+  currentUser: any = null;
   loading = false;
   errorMessage = '';
   successMessage = '';
@@ -30,33 +31,69 @@ export class EditUserComponent implements OnInit {
       password: ['', [Validators.minLength(6)]],
       first_name: ['', [Validators.required]],
       last_name: ['', [Validators.required]],
-      contact_number: ['']
+      contact_number: [''],
+      address: ['']
     });
   }
 
   ngOnInit() {
     this.userId = +this.route.snapshot.paramMap.get('id')!;
+    // Check if user has token (authenticated)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.errorMessage = 'You are not authenticated. Please login first.';
+      this.router.navigate(['/login']);
+      return;
+    }
+    
+    // Get current user from localStorage first
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      // If editing the current user, use the cached data
+      if (user.id === this.userId) {
+        this.currentUser = user;
+        this.populateForm(user);
+        return;
+      }
+    }
+    
+    // Otherwise try to load from API
     this.loadUser();
+  }
+
+  populateForm(user: any) {
+    this.editForm.patchValue({
+      username: user.username,
+      email: user.email,
+      first_name: user.userDetails?.first_name || '',
+      last_name: user.userDetails?.last_name || '',
+      contact_number: user.userDetails?.contact_number || '',
+      address: user.userDetails?.address || ''
+    });
   }
 
   loadUser() {
     this.loading = true;
+    this.errorMessage = '';
     this.apiService.getAllUsers().subscribe({
       next: (users) => {
         const user = users.find(u => u.id === this.userId);
         if (user) {
-          this.editForm.patchValue({
-            username: user.username,
-            email: user.email,
-            first_name: user.userDetails?.first_name || '',
-            last_name: user.userDetails?.last_name || '',
-            contact_number: user.userDetails?.contact_number || ''
-          });
+          this.currentUser = user;
+          this.populateForm(user);
+        } else {
+          // If user not found in API, at least we have the form displayed
+          console.warn('User not found in API');
         }
         this.loading = false;
       },
-      error: () => {
-        this.errorMessage = 'Failed to load user data.';
+      error: (error) => {
+        console.error('Error loading user:', error);
+        // Don't show error if we already have the user from localStorage
+        if (!this.currentUser) {
+          this.errorMessage = error.error?.message || 'Failed to load user data. Please try again.';
+        }
         this.loading = false;
       }
     });
@@ -70,16 +107,13 @@ export class EditUserComponent implements OnInit {
 
       const formValue = this.editForm.value;
       const updateData: any = {
-        username: formValue.username,
-        email: formValue.email,
         userDetails: {
-          first_name: formValue.first_name,
-          last_name: formValue.last_name,
-          contact_number: formValue.contact_number || undefined
+          contact_number: formValue.contact_number || undefined,
+          address: formValue.address || undefined
         }
       };
 
-      if (formValue.password) {
+      if (formValue.password && formValue.password.trim()) {
         updateData.password = formValue.password;
       }
 
@@ -87,11 +121,23 @@ export class EditUserComponent implements OnInit {
         next: () => {
           this.successMessage = 'User updated successfully!';
           this.loading = false;
+          
+          // Update localStorage with new data
+          if (this.currentUser) {
+            this.currentUser.userDetails = {
+              ...this.currentUser.userDetails,
+              contact_number: formValue.contact_number,
+              address: formValue.address
+            };
+            localStorage.setItem('user', JSON.stringify(this.currentUser));
+          }
+          
           setTimeout(() => {
             this.router.navigate(['/landing']);
           }, 1500);
         },
         error: (error) => {
+          console.error('Update error:', error);
           this.errorMessage = error.error?.message || 'Failed to update user. Please try again.';
           this.loading = false;
         }
@@ -118,4 +164,5 @@ export class EditUserComponent implements OnInit {
   get first_name() { return this.editForm.get('first_name'); }
   get last_name() { return this.editForm.get('last_name'); }
   get contact_number() { return this.editForm.get('contact_number'); }
+  get address() { return this.editForm.get('address'); }
 }

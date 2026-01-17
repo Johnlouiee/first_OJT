@@ -53,10 +53,13 @@ export class ApiService {
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': token ? `Bearer ${token}` : '',
+    let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
   }
 
   register(data: RegisterRequest): Observable<User> {

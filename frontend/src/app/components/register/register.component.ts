@@ -28,7 +28,8 @@ export class RegisterComponent {
       confirmPassword: ['', [Validators.required]],
       first_name: ['', [Validators.required]],
       last_name: ['', [Validators.required]],
-      contact_number: ['']
+      contact_number: [''],
+      address: ['']
     }, { validators: this.passwordMatchValidator });
   }
 
@@ -53,7 +54,8 @@ export class RegisterComponent {
         userDetails: {
           first_name: formValue.first_name,
           last_name: formValue.last_name,
-          contact_number: formValue.contact_number || undefined
+          contact_number: formValue.contact_number || undefined,
+          address: formValue.address || undefined
         }
       };
 
@@ -88,5 +90,6 @@ export class RegisterComponent {
   get first_name() { return this.registerForm.get('first_name'); }
   get last_name() { return this.registerForm.get('last_name'); }
   get contact_number() { return this.registerForm.get('contact_number'); }
+  get address() { return this.registerForm.get('address'); }
   get passwordMismatch() { return this.registerForm.errors?.['passwordMismatch']; }
 }

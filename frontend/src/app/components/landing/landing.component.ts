@@ -12,9 +12,12 @@ import { ApiService, User } from '../../services/api.service';
 })
 export class LandingComponent implements OnInit {
   users: User[] = [];
+  currentUser: User | null = null;
   loading = false;
   errorMessage = '';
   successMessage = '';
+  showProfileSection = false;
+  showUserList = true;
 
   constructor(
     private apiService: ApiService,
@@ -29,6 +32,12 @@ export class LandingComponent implements OnInit {
       localStorage.removeItem('loginSuccess');
     }
 
+    // Get current user from localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      this.currentUser = JSON.parse(userStr);
+    }
+
     this.loadUsers();
   }
 
@@ -41,7 +50,8 @@ export class LandingComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.errorMessage = 'Failed to load users. Please try again.';
+        console.error('Failed to load users:', error);
+        this.errorMessage = error.error?.message || 'Failed to load users. Please try again.';
         this.loading = false;
       }
     });
@@ -49,6 +59,20 @@ export class LandingComponent implements OnInit {
 
   editUser(userId: number) {
     this.router.navigate(['/edit-user', userId]);
+  }
+
+  editProfile() {
+    if (this.currentUser?.id) {
+      this.router.navigate(['/edit-user', this.currentUser.id]);
+    }
+  }
+
+  toggleProfileSection() {
+    this.showProfileSection = !this.showProfileSection;
+  }
+
+  toggleUserList() {
+    this.showUserList = !this.showUserList;
   }
 
   logout() {
