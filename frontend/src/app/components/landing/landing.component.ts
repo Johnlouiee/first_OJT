@@ -17,7 +17,7 @@ export class LandingComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   showProfileSection = false;
-  showUserList = true;
+  showUserList = false;
 
   constructor(
     private apiService: ApiService,
