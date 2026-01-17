@@ -14,6 +14,7 @@ export class LandingComponent implements OnInit {
   users: User[] = [];
   loading = false;
   errorMessage = '';
+  successMessage = '';
 
   constructor(
     private apiService: ApiService,
@@ -21,6 +22,13 @@ export class LandingComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Check for login success message
+    const loginSuccess = localStorage.getItem('loginSuccess');
+    if (loginSuccess) {
+      this.successMessage = loginSuccess;
+      localStorage.removeItem('loginSuccess');
+    }
+
     this.loadUsers();
   }
 

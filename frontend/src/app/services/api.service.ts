@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface UserDetails {
@@ -51,6 +51,14 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json'
+    });
+  }
+
   register(data: RegisterRequest): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/auth/register`, data);
   }
@@ -60,10 +68,10 @@ export class ApiService {
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users`);
+    return this.http.get<User[]>(`${this.apiUrl}/users`, { headers: this.getHeaders() });
   }
 
   updateUser(id: number, data: UpdateUserRequest): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/users/${id}`, data);
+    return this.http.put<User>(`${this.apiUrl}/users/${id}`, data, { headers: this.getHeaders() });
   }
 }

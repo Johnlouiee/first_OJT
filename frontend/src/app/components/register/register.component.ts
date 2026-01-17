@@ -59,11 +59,10 @@ export class RegisterComponent {
 
       this.apiService.register(registerData).subscribe({
         next: () => {
-          this.successMessage = 'Successfully registered! Redirecting to login...';
+          localStorage.setItem('registerSuccess', 'Successfully registered!');
+          this.successMessage = '';
           this.errorMessage = '';
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-          }, 2000);
+          this.router.navigate(['/login']);
         },
         error: (error) => {
           this.errorMessage = error.error?.message || 'Registration failed. Please try again.';

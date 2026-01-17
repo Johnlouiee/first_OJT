@@ -25,13 +25,22 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     const { username, email, password, userDetails } = registerDto;
 
-    // Check if user already exists
-    const existingUser = await this.userRepository.findOne({
-      where: [{ email }, { username }],
+    // Check if email already exists
+    const existingEmailUser = await this.userRepository.findOne({
+      where: { email },
     });
 
-    if (existingUser) {
-      throw new ConflictException('User with this email or username already exists');
+    if (existingEmailUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // Check if username already exists
+    const existingUsernameUser = await this.userRepository.findOne({
+      where: { username },
+    });
+
+    if (existingUsernameUser) {
+      throw new ConflictException('Username already taken');
     }
 
     // Hash password
@@ -73,7 +82,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Email not found');
     }
 
     // Check if user is active
@@ -85,7 +94,7 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Incorrect password');
     }
 
     // Generate JWT token
