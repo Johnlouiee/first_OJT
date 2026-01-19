@@ -33,6 +33,21 @@
         <div class="text-sm text-red-800">{{ errorMessage }}</div>
       </div>
 
+      <!-- Profile Card -->
+      <div *ngIf="currentUser" class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+              {{ currentUser.username.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+          <div class="ml-4">
+            <h2 class="text-xl font-semibold text-gray-900">Welcome, {{ currentUser.username }}!</h2>
+            <p class="text-gray-600">{{ currentUser.email }}</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Edit Profile Section -->
       <div *ngIf="showProfileSection && currentUser" class="bg-white shadow overflow-hidden sm:rounded-md mb-6">
         <div class="px-6 py-6">
